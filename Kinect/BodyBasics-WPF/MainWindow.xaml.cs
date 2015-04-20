@@ -358,6 +358,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
                             this.DrawHand(body.HandLeftState, jointPoints[JointType.HandLeft], dc);
                             this.DrawHand(body.HandRightState, jointPoints[JointType.HandRight], dc);
+
+                            this.printHeadXPosition(jointPoints[JointType.Head], dc);
                         }
                     }
 
@@ -365,6 +367,25 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
                 }
             }
+        }
+
+        /// <summary>
+        /// My method to print the X position of the head in a percentage value of the screen
+        /// </summary>
+        /// <param name="head"></param>
+        /// <param name="draw"></param>
+        private void printHeadXPosition(Point head, DrawingContext draw)
+        {
+            String printString = "";
+            double percentage = (head.X / Convert.ToDouble(displayWidth)) * 100.0;
+            double roundedPercentage = Math.Round(percentage, 2);
+            printString = roundedPercentage.ToString();
+
+            draw.DrawText(new FormattedText(printString + "%", CultureInfo.GetCultureInfo("en-us"),
+                FlowDirection.LeftToRight,
+                new Typeface("Verdana"),
+                36, System.Windows.Media.Brushes.White),
+                new System.Windows.Point(200, 116));
         }
 
         /// <summary>
