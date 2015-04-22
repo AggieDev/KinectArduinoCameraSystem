@@ -16,6 +16,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
     using Microsoft.Kinect;
+    using System.IO.Ports;
+    using System.Threading;
 
     /// <summary>
     /// Interaction logic for MainWindow
@@ -127,6 +129,118 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         /// </summary>
         private string statusText = null;
 
+
+
+
+
+
+
+
+
+        //PROJECT - MY CUSTOM VARIABLES
+        private SerialPort serialPort;
+        private bool portFound;
+
+        //PROJECT - MY CUSTOM METHODS
+        /// <summary>
+        /// My method to print the X position of the head in a percentage value of the screen
+        /// </summary>
+        /// <param name="head"></param>
+        /// <param name="draw"></param>
+        private void printHeadXPosition(Point head, DrawingContext draw)
+        {
+            String printString = "";
+            double percentage = (head.X / Convert.ToDouble(displayWidth)) * 100.0;
+            double roundedPercentage = Math.Round(percentage, 2);
+            printString = roundedPercentage.ToString();
+
+            draw.DrawText(new FormattedText("Head X: " + printString + "%", CultureInfo.GetCultureInfo("en-us"),
+                FlowDirection.LeftToRight,
+                new Typeface("Verdana"),
+                30, System.Windows.Media.Brushes.White),
+                new System.Windows.Point(130, 116));
+        }
+
+        private void printPortFound(DrawingContext draw)
+        {
+            String printString = "Arduino found: ";
+
+            draw.DrawText(new FormattedText(printString + portFound, CultureInfo.GetCultureInfo("en-us"),
+                FlowDirection.LeftToRight,
+                new Typeface("Verdana"),
+                30, System.Windows.Media.Brushes.White),
+                new System.Windows.Point(100, 170));
+        }
+
+        private void setComPort()
+	    {
+	        try
+	        {
+		        string[] ports = SerialPort.GetPortNames();
+		        foreach (string port in ports)
+		        {
+                    serialPort = new SerialPort(port, 9600);
+		            if (DetectArduino())
+		            {
+			            portFound = true;
+			            break;
+		            }
+		            else
+		            {
+			            portFound = false;
+		            }
+		        }
+	        }
+	        catch (Exception e)
+	        {
+	        }
+	    }
+	    private bool DetectArduino()
+	    {
+	        try
+	        {
+		        //The below setting are for the Hello handshake
+		        byte[] buffer = new byte[5];
+		        buffer[0] = Convert.ToByte(16);
+		        buffer[1] = Convert.ToByte(128);
+		        buffer[2] = Convert.ToByte(0);
+		        buffer[3] = Convert.ToByte(0);
+		        buffer[4] = Convert.ToByte(4);
+		        int intReturnASCII = 0;
+		        char charReturnValue = (Char)intReturnASCII;
+                serialPort.Open();
+                serialPort.Write(buffer, 0, 5);
+		        Thread.Sleep(1000);
+                int count = serialPort.BytesToRead;
+		        string returnMessage = "";
+		        while (count > 0)
+		        {
+                    intReturnASCII = serialPort.ReadByte();
+		            returnMessage = returnMessage + Convert.ToChar(intReturnASCII);
+		            count--;
+		        }
+		        //ComPort.name = returnMessage;
+                serialPort.Close();
+		        if (returnMessage.Contains("HELLO FROM ARDUINO"))
+		        {
+		            return true;
+		        }
+		        else
+		        {
+		            return false;
+		        }
+            }
+	        catch (Exception e)
+	        {
+		        return false;
+	        }
+        }
+
+
+
+
+
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -216,6 +330,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
             // initialize the components (controls) of the window
             this.InitializeComponent();
+
+            this.setComPort();
         }
 
         /// <summary>
@@ -360,6 +476,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                             this.DrawHand(body.HandRightState, jointPoints[JointType.HandRight], dc);
 
                             this.printHeadXPosition(jointPoints[JointType.Head], dc);
+                            this.printPortFound(dc);
                         }
                     }
 
@@ -367,25 +484,6 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, this.displayWidth, this.displayHeight));
                 }
             }
-        }
-
-        /// <summary>
-        /// My method to print the X position of the head in a percentage value of the screen
-        /// </summary>
-        /// <param name="head"></param>
-        /// <param name="draw"></param>
-        private void printHeadXPosition(Point head, DrawingContext draw)
-        {
-            String printString = "";
-            double percentage = (head.X / Convert.ToDouble(displayWidth)) * 100.0;
-            double roundedPercentage = Math.Round(percentage, 2);
-            printString = roundedPercentage.ToString();
-
-            draw.DrawText(new FormattedText(printString + "%", CultureInfo.GetCultureInfo("en-us"),
-                FlowDirection.LeftToRight,
-                new Typeface("Verdana"),
-                36, System.Windows.Media.Brushes.White),
-                new System.Windows.Point(200, 116));
         }
 
         /// <summary>
