@@ -165,48 +165,18 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
         private void setComPort()
         {
-            String a3 = "COM3"; 
-            String a4 = "COM4"; 
-            String a5 = "COM5"; 
-            String a6 = "COM6";
-            serialPort = new SerialPort(a3, 9600);
-            serialPort.Open();
+            String portName = "COM3"; 
             try
             {
+                serialPort = new SerialPort(portName, 9600);
+                serialPort.Open();
                 serialPort.Write("test");
             }
             catch (Exception e)
             {
-                serialPort.Close();
-                serialPort = new SerialPort(a4, 9600);
-                serialPort.Open();
-                try
-                {
-                    serialPort.Write("test");
-                }
-                catch (Exception e2)
+                if (serialPort != null && serialPort.IsOpen)
                 {
                     serialPort.Close();
-                    serialPort = new SerialPort(a5, 9600);
-                    serialPort.Open();
-                    try
-                    {
-                        serialPort.Write("test");
-                    }
-                    catch (Exception e3)
-                    {
-                        serialPort.Close();
-                        serialPort = new SerialPort(a6, 9600);
-                        serialPort.Open();
-                        try
-                        {
-                            serialPort.Write("test");
-                        }
-                        catch (Exception e4)
-                        {
-                            Debug.Write("ERROR, NO ARDUINO FOUND");
-                        }
-                    }
                 }
             }
         }
@@ -216,8 +186,9 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             portFound = false;
             try
             {
-                serialPort.Write("test");
+                serialPort.Write(roundedHeadPercentage.ToString());
                 portFound = true;
+                //String s = serialPort.Read();
             }
             catch (Exception e)
             {
