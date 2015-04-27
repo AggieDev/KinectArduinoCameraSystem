@@ -141,6 +141,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         //PROJECT - MY CUSTOM VARIABLES
         private SerialPort serialPort;
         private bool portFound;
+        private double roundedHeadPercentage;
 
         //PROJECT - MY CUSTOM METHODS
         /// <summary>
@@ -152,8 +153,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
         {
             String printString = "";
             double percentage = (head.X / Convert.ToDouble(displayWidth)) * 100.0;
-            double roundedPercentage = Math.Round(percentage, 2);
-            printString = roundedPercentage.ToString();
+            roundedHeadPercentage = Math.Round(percentage, 2);
+            printString = roundedHeadPercentage.ToString();
 
             draw.DrawText(new FormattedText("Head X: " + printString + "%", CultureInfo.GetCultureInfo("en-us"),
                 FlowDirection.LeftToRight,
